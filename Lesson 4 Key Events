@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <stdbool.h>
+
+int main(int argc, char* argv[])
+{	SDL_Event eve;
+	
+
+	bool quit = false;
+
+
+		SDL_Surface *surface = NULL;
+		SDL_Surface *image =NULL;
+		SDL_Surface *image2 = NULL;
+		SDL_Init(SDL_INIT_VIDEO);
+		image = SDL_LoadBMP("C:/Users/new win/Desktop/contra.bmp");
+		image2 =SDL_LoadBMP("C:/Users/new win/Desktop/contra22.bmp");
+
+		SDL_Window* window = SDL_CreateWindow("hello",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,640,480,0);
+		surface = SDL_GetWindowSurface(window);
+
+
+		while(!quit){
+		SDL_PollEvent(&eve);
+		if(eve.type == SDL_QUIT)
+			quit = true;
+		switch (eve.key.keysym.sym ){
+			case  SDLK_w:
+					SDL_BlitSurface(image,NULL,surface,NULL);
+					break;
+			case  SDLK_a:
+					SDL_BlitSurface(image2,NULL,surface,NULL);
+					break;
+
+
+				}
+		
+		SDL_UpdateWindowSurface(window);
+		}
+
+
+		SDL_FreeSurface(image);
+
+		 SDL_DestroyWindow(window);
+		   SDL_Quit();
+		    return 0;
+
+}
+
