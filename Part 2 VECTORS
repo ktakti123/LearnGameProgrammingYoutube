@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <stdbool.h>
+#include <math.h>
+int main(int argc, char* argv[])
+{		SDL_Event eve;
+		bool quit = false;
+		SDL_Renderer *ren =NULL;
+		SDL_Renderer *ren2 =NULL;
+		SDL_Init(SDL_INIT_VIDEO);
+		SDL_Window* window = SDL_CreateWindow("hello",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,640,480,0);
+		ren = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+		ren2 = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+		SDL_SetRenderDrawColor(ren, 255,255,255,255);
+		SDL_RenderClear(ren);
+		
+		int x= 0;
+		int y= 0;
+
+		float vx = 0 ;
+		float vy = 0 ;
+
+		float ax = 0;
+		float ay = 0;
+		
+	while(!quit){
+		SDL_PollEvent(&eve);
+
+
+		ax = (2*(rand()/((float)RAND_MAX)))-1;
+		ay = (2*(rand()/((float)RAND_MAX)))-1;
+
+
+		vx = vx + ax;
+		vy = vy + ay;
+
+
+
+	if (vx>5||vx<-5)
+		vx = 0;
+	if (vy>5||vy<-5)
+		vy = 0;
+
+
+		x = x+ round(vx);
+		y = y + round(vy);
+
+		
+		if (x>640){	x=640;
+					vx = -vx;}
+		if (x < 0){ x=0;
+			        vx = -vx;}
+		if (y>480){ y=480;
+					vy = -vy;}
+		if (y <0){  y=0;
+			        vy = -vy;}
+		
+		SDL_Rect rect = {x,y,20,20};
+		SDL_SetRenderDrawColor(ren, 255,0,0,255);
+        SDL_RenderFillRect(ren, &rect);
+		SDL_RenderPresent(ren);
+		SDL_SetRenderDrawColor(ren, 255,255,240,255);
+		SDL_RenderClear(ren);
+		SDL_Delay(10);
+	}
+		
+		SDL_DestroyRenderer(ren);
+		SDL_DestroyRenderer(ren2);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return 0;
+
+}
