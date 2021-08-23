@@ -24,7 +24,7 @@ while (1)
         t=0;
 
      screen[t] = '.';
-     screen[c] = '/';
+     screen[c] = 219;
 
      WriteConsoleOutputCharacter(hConsole, screen, m, coordDest, &dwBytesWritten);
  }
