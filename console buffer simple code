@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <Windows.h>
+int main(int argc, char* argv[])
+{     
+    int i = 120;
+    int j = 30; 
+    int m = 3600;
+    int c = 0;
+    char screen[3600];
+    DWORD dwBytesWritten = 0;
+    COORD coordDest;
+    coordDest.X = 0;
+    coordDest.Y = 0;
+    HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+    SetConsoleActiveScreenBuffer(hConsole);
+   for (int k = 0; k < 3600; k++) screen[k] = 'a';
+    int t = 0;
+
+while (1)
+{
+    t=t+1;
+    c=3600-t;
+    if (t>= 3600)
+        t=0;
+
+     screen[t] = '.';
+     screen[c] = '/';
+
+     WriteConsoleOutputCharacter(hConsole, screen, m, coordDest, &dwBytesWritten);
+ }
+    return 0;
+}
