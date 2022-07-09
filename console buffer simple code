@@ -1,32 +1,59 @@
-#include <stdio.h>
-#include <Windows.h>
-int main(int argc, char* argv[])
-{     
-    int i = 120;
-    int j = 30; 
-    int m = 3600;
-    int c = 0;
-    char screen[3600];
-    DWORD dwBytesWritten = 0;
-    COORD coordDest;
-    coordDest.X = 0;
+#include<stdio.h>
+#include <windows.h>
+int nScreenWidth = 120;
+int nScreenHeight = 30;
+typedef struct _CONSOLE_FONT_INFOEX
+{ULONG cbSize;
+    DWORD nFont;
+    COORD dwFontSize;
+    UINT  FontFamily;
+    UINT  FontWeight;
+    WCHAR FaceName[LF_FACESIZE];
+}CONSOLE_FONT_INFOEX, *PCONSOLE_FONT_INFOEX;
+BOOL WINAPI SetCurrentConsoleFontEx(HANDLE h, BOOL b, PCONSOLE_FONT_INFOEX lp);
+
+int main()
+{	COORD coordDest;
+	 coordDest.X = 0;
     coordDest.Y = 0;
-    HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-    SetConsoleActiveScreenBuffer(hConsole);
-   for (int k = 0; k < 3600; k++) screen[k] = 'a';
-    int t = 0;
+    COORD coordyy;
+	 coordyy.X = 8;
+    coordyy.Y = 8;
 
-while (1)
-{
-    t=t+1;
-    c=3600-t;
-    if (t>= 3600)
-        t=0;
+   
+    CONSOLE_FONT_INFOEX cfi={0};
+    cfi.cbSize = sizeof(cfi);
+		cfi.nFont = 0;
+		cfi.dwFontSize.X = 8;
+		cfi.dwFontSize.Y = 8;
+		cfi.FontFamily = FF_DONTCARE;
+		cfi.FontWeight = FW_NORMAL;	 
 
-     screen[t] = '.';
-     screen[c] = 219;
 
-     WriteConsoleOutputCharacter(hConsole, screen, m, coordDest, &dwBytesWritten);
- }
-    return 0;
+
+
+	// Create Screen Buffer
+	char buffer[nScreenWidth*nScreenHeight];
+	char *screen = buffer;
+	for (int i = 0; i < nScreenWidth*nScreenHeight; i++) screen[i] = L' ';
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	SetCurrentConsoleFontEx(hConsole, 1 , &cfi);
+   
+		
+	DWORD dwBytesWritten = 0;
+	for (int i = 0 ; i < 3600; ++i)
+    {
+    	buffer[i] = 'a';
+    }
+ 
+
+	while(1)
+	{
+
+		screen[nScreenWidth * nScreenHeight - 1] = '\0';
+		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, coordDest, &dwBytesWritten);
+	}
+
+	return 0;
 }
