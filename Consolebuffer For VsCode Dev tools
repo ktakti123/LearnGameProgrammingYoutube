@@ -1,0 +1,48 @@
+#include<stdio.h>
+#include <windows.h>
+int nScreenWidth = 120;
+int nScreenHeight = 30;
+ DWORD dwBytesWritten = 0;
+
+
+
+
+int main()
+{	
+	
+	COORD coordDest;
+	 coordDest.X = 0;
+     coordDest.Y = 0;
+     CONSOLE_FONT_INFOEX cfi={0};
+     cfi.cbSize = sizeof(cfi);
+		cfi.nFont = 0;
+		cfi.dwFontSize.X = 8;
+		cfi.dwFontSize.Y = 8;
+		cfi.FontFamily = FF_DONTCARE;
+		cfi.FontWeight = FW_NORMAL;	 
+
+
+	// Create Screen Buffer
+	char buffer[3600];
+	char *screen = buffer;
+	
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	SetConsoleActiveScreenBuffer(hConsole);
+	SetCurrentConsoleFontEx(hConsole, 5 , &cfi);
+   
+
+	for (int i = 0 ; i < 3600; ++i)
+    {
+    	buffer[i] = '3';
+    }
+ 
+
+	while(1)
+	{
+
+		screen[nScreenWidth * nScreenHeight - 1] = '\0';
+		WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, coordDest, &dwBytesWritten);
+	}
+
+	return 0;
+}
