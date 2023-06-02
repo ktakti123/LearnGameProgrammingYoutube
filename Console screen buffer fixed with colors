@@ -1,9 +1,12 @@
 #include<stdio.h>
 #include <windows.h>
-int nScreenWidth = 120;
-int nScreenHeight = 30;
-SMALL_RECT dwBytesWritten = {0,0,120,30}; 
-typedef struct _CONSOLE_FONT_INFOEX
+#include<time.h>
+#include <unistd.h>
+int nScreenWidth = 500;
+int nScreenHeight = 300;
+void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScreenHeight]);
+
+typedef struct CONSOLE_FONT_INFOEX
 {
  ULONG cbSize; DWORD nFont;COORD dwFontSize;UINT  FontFamily;
  UINT  FontWeight;WCHAR FaceName[LF_FACESIZE];
@@ -21,9 +24,11 @@ int main()
   CONSOLE_FONT_INFOEX cfi={0};
   cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
-	cfi.dwFontSize.X = 8;
-	cfi.dwFontSize.Y = 8;
+	cfi.dwFontSize.X = 1;
+	cfi.dwFontSize.Y = 1;
 	COORD charBufSize = {nScreenWidth,nScreenHeight};
+	SMALL_RECT dwBytesWritten = {0,0,nScreenWidth,nScreenHeight}; 
+	 SMALL_RECT windowSize = {0, 0, nScreenWidth, nScreenHeight};
 
 
 	// Create Screen Buffer
@@ -31,18 +36,79 @@ int main()
 	CHAR_INFO *screen = buffer;
 	
 	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL); 
+	SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
 	SetConsoleActiveScreenBuffer(hConsole);
-	SetCurrentConsoleFontEx(hConsole, 1 , &cfi);
-	while(1)
-	{
-		for (int i = 0 ; i < 3600; ++i)
+	SetCurrentConsoleFontEx(hConsole, FALSE , &cfi);
+	for (int i = 0 ; i < nScreenWidth*nScreenHeight; ++i)
     {
     	buffer[i].Char.AsciiChar = ' ';
 			buffer[i].Attributes =  BACKGROUND_RED | BACKGROUND_INTENSITY;
     }
+	while(1)
+	{
+		
+	 DrawLine(5, 5,60, 20 , buffer);
 		WriteConsoleOutput(hConsole, screen,charBufSize, coordDest, &dwBytesWritten);
+		Sleep(10);
 		
 	}
 
 	return 0;
 }
+
+
+void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScreenHeight])
+	{
+		int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+		dx = x2 - x1; dy = y2 - y1;
+		dx1 = abs(dx); dy1 = abs(dy);
+		px = 2 * dy1 - dx1;	py = 2 * dx1 - dy1;
+		if (dy1 <= dx1)
+		{
+			if (dx >= 0)
+				{ x = x1; y = y1; xe = x2; }
+			else
+				{ x = x2; y = y2; xe = x1;}
+
+
+			buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+			
+			for (i = 0; x<xe; i++)
+			{
+				x = x + 1;
+				if (px<0)
+					px = px + 2 * dy1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) y = y + 1; else y = y - 1;
+					px = px + 2 * (dy1 - dx1);
+				}
+					
+						buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+			}
+		}
+		else
+		{
+			if (dy >= 0)
+				{ x = x1; y = y1; ye = y2; }
+			else
+				{ x = x2; y = y2; ye = y1; }
+
+		
+				buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+
+			for (i = 0; y<ye; i++)
+			{
+				y = y + 1;
+				if (py <= 0)
+					py = py + 2 * dx1;
+				else
+				{
+					if ((dx<0 && dy<0) || (dx>0 && dy>0)) x = x + 1; else x = x - 1;
+					py = py + 2 * (dx1 - dy1);
+				}
+			
+					buffer[y*nScreenWidth+x].Attributes =  BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+			}
+		}
+	}
