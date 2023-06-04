@@ -13,7 +13,7 @@ typedef struct CONSOLE_FONT_INFOEX
 
 BOOL WINAPI SetCurrentConsoleFontEx(HANDLE h, BOOL b, PCONSOLE_FONT_INFOEX lp);
 
-	int nScreenWidth = 100;
+	int nScreenWidth = 900;
 	int nScreenHeight = 330;
 
 
@@ -22,23 +22,28 @@ int main()
 	int j = 0;
 	int nBufferWidth = nScreenWidth-1;
 	int nBufferHeight = nScreenHeight -1;
-	SMALL_RECT m_rectWindow = { 0, 0, nScreenWidth, nScreenHeight };
+	SMALL_RECT m_rectWindow = { 0, 0, 1, 1 };
 	COORD coordDest;
 	coordDest.X = 0;
   coordDest.Y = 0;
+	HANDLE wHnd; 
   CONSOLE_FONT_INFOEX cfi;
   cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
 	cfi.dwFontSize.X = 1;
 	cfi.dwFontSize.Y = 1;
 	COORD charBufSize = {nBufferWidth,nBufferHeight};
-	SMALL_RECT windowSize = {0, 0, nScreenWidth, nScreenHeight};
+	SMALL_RECT windowSize = {0, 0, nScreenWidth-2, nScreenHeight-2};
+	wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
+  SetConsoleWindowInfo(wHnd, TRUE, &windowSize);
+
 	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	
-	 SetConsoleWindowInfo(hConsole, FALSE, &windowSize);
 	 SetConsoleScreenBufferSize(hConsole, charBufSize);
 	 SetConsoleActiveScreenBuffer(hConsole);
 	 SetCurrentConsoleFontEx(hConsole, FALSE , &cfi);
+	 
+	 
 
 
 
@@ -58,8 +63,8 @@ int main()
 	{
 		
 	DrawLine(5, 5,60, 20 , buffer);
-	WriteConsoleOutput(hConsole, screen,charBufSize, coordDest, &m_rectWindow);
-	Sleep(10);
+	WriteConsoleOutput(hConsole, screen,charBufSize, coordDest, &windowSize);
+	// Sleep(10);
 		
 	}
 
