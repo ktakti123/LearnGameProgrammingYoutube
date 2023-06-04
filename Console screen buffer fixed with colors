@@ -2,9 +2,8 @@
 #include <windows.h>
 #include<time.h>
 #include <unistd.h>
-int nScreenWidth = 500;
-int nScreenHeight = 300;
-void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScreenHeight]);
+
+void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[499*299]);
 
 typedef struct CONSOLE_FONT_INFOEX
 {
@@ -14,32 +13,43 @@ typedef struct CONSOLE_FONT_INFOEX
 
 BOOL WINAPI SetCurrentConsoleFontEx(HANDLE h, BOOL b, PCONSOLE_FONT_INFOEX lp);
 
+	int nScreenWidth = 100;
+	int nScreenHeight = 330;
+
 
 int main()
 {
 	int j = 0;
+	int nBufferWidth = nScreenWidth-1;
+	int nBufferHeight = nScreenHeight -1;
+	SMALL_RECT m_rectWindow = { 0, 0, nScreenWidth, nScreenHeight };
 	COORD coordDest;
 	coordDest.X = 0;
   coordDest.Y = 0;
-  CONSOLE_FONT_INFOEX cfi={0};
+  CONSOLE_FONT_INFOEX cfi;
   cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
 	cfi.dwFontSize.X = 1;
 	cfi.dwFontSize.Y = 1;
-	COORD charBufSize = {nScreenWidth,nScreenHeight};
-	SMALL_RECT dwBytesWritten = {0,0,nScreenWidth,nScreenHeight}; 
-	 SMALL_RECT windowSize = {0, 0, nScreenWidth, nScreenHeight};
+	COORD charBufSize = {nBufferWidth,nBufferHeight};
+	SMALL_RECT windowSize = {0, 0, nScreenWidth, nScreenHeight};
+	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	
+	 SetConsoleWindowInfo(hConsole, FALSE, &windowSize);
+	 SetConsoleScreenBufferSize(hConsole, charBufSize);
+	 SetConsoleActiveScreenBuffer(hConsole);
+	 SetCurrentConsoleFontEx(hConsole, FALSE , &cfi);
+
 
 
 	// Create Screen Buffer
-	CHAR_INFO buffer[nScreenWidth*nScreenHeight];
+	CHAR_INFO buffer[nBufferWidth*nBufferHeight];
 	CHAR_INFO *screen = buffer;
 	
-	HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL); 
-	SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
-	SetConsoleActiveScreenBuffer(hConsole);
-	SetCurrentConsoleFontEx(hConsole, FALSE , &cfi);
-	for (int i = 0 ; i < nScreenWidth*nScreenHeight; ++i)
+	
+	
+
+	for (int i = 0 ; i < nBufferWidth*nBufferHeight; ++i)
     {
     	buffer[i].Char.AsciiChar = ' ';
 			buffer[i].Attributes =  BACKGROUND_RED | BACKGROUND_INTENSITY;
@@ -47,9 +57,9 @@ int main()
 	while(1)
 	{
 		
-	 DrawLine(5, 5,60, 20 , buffer);
-		WriteConsoleOutput(hConsole, screen,charBufSize, coordDest, &dwBytesWritten);
-		Sleep(10);
+	DrawLine(5, 5,60, 20 , buffer);
+	WriteConsoleOutput(hConsole, screen,charBufSize, coordDest, &m_rectWindow);
+	Sleep(10);
 		
 	}
 
@@ -57,7 +67,7 @@ int main()
 }
 
 
-void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScreenHeight])
+void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[(nScreenWidth-1)*(nScreenHeight -1)])
 	{
 		int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
 		dx = x2 - x1; dy = y2 - y1;
@@ -71,7 +81,7 @@ void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScre
 				{ x = x2; y = y2; xe = x1;}
 
 
-			buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+			buffer[y*(nScreenWidth-1)+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
 			
 			for (i = 0; x<xe; i++)
 			{
@@ -84,7 +94,7 @@ void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScre
 					px = px + 2 * (dy1 - dx1);
 				}
 					
-						buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+						buffer[y*(nScreenWidth-1)+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
 			}
 		}
 		else
@@ -95,7 +105,7 @@ void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScre
 				{ x = x2; y = y2; ye = y1; }
 
 		
-				buffer[y*nScreenWidth+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+				buffer[y*(nScreenWidth-1)+x].Attributes = BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
 
 			for (i = 0; y<ye; i++)
 			{
@@ -108,7 +118,7 @@ void DrawLine(int x1, int y1, int x2, int y2,CHAR_INFO buffer[nScreenWidth*nScre
 					py = py + 2 * (dx1 - dy1);
 				}
 			
-					buffer[y*nScreenWidth+x].Attributes =  BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
+					buffer[y*(nScreenWidth-1)+x].Attributes =  BACKGROUND_GREEN| BACKGROUND_RED | BACKGROUND_BLUE;
 			}
 		}
 	}
