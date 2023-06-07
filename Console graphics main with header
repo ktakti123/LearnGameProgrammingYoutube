@@ -1,24 +1,17 @@
 #include <stdio.h>
 #include <windows.h>
-#include <unistd.h>
 #include "PGRG_ConsoleGraphics.h"
-
 int main()
 {
-
-	PGRG_WindowStart(900, 330, 1);
-	for (int i = 0; i < 899 * 329; ++i)
-	{
-		buffer[i].Char.AsciiChar = ' ';
-		buffer[i].Attributes = BACKGROUND_RED | BACKGROUND_INTENSITY;
-	}
+	PGRG_WindowStart(300, 330, 2);
+	PGRG buffer[300 * 330];
+	PGRG_FillColor(buffer);
 	while (1)
 	{
-
-		DrawLine(5, 5, 60, 20, buffer);
-		WriteConsoleOutput(hConsole, screen, charBufSize, coordDest, &windowSize);
-		// Sleep(10);
+		PGRG_DrawLine(5, 5, 60, 20, buffer);
+		PGRG_DrawCircle(20,20,10,buffer);
+		PGRG_Display(buffer);
+		PGRG_FillCircle(100,100,50,buffer);
 	}
-
 	return 0;
 }
