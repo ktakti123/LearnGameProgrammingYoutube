@@ -11,31 +11,31 @@ typedef struct CONSOLE_FONT_INFOEX
 	UINT FontWeight;
 	WCHAR FaceName[LF_FACESIZE];
 } CONSOLE_FONT_INFOEX, *PCONSOLE_FONT_INFOEX;
+typedef CHAR_INFO PGRG;
 
 BOOL WINAPI SetCurrentConsoleFontEx(HANDLE h, BOOL b, PCONSOLE_FONT_INFOEX lp);
 
 int nScreenWidth = 0;
 int nScreenHeight = 0;
-COORD charBufSize = {899, 329};
+COORD charBufSize = {0, 0};
 COORD coordDest = {0, 0};
-SMALL_RECT windowSize = {0, 0, 898, 328};
+SMALL_RECT windowSize = {0, 0, 0, 0};
 HANDLE hConsole;
-CHAR_INFO Canvas;
-CHAR_INFO buffer[899 * 329];
-CHAR_INFO *screen = buffer;
 
 void PGRG_WindowStart(int Screen_Width, int Screen_Height, int Font_Size)
 {
 	nScreenWidth = Screen_Width;
 	nScreenHeight = Screen_Height;
 	HANDLE wHnd;
+	charBufSize.X = nScreenWidth-1;
+	charBufSize.Y = nScreenHeight-1;
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
 	cfi.dwFontSize.X = Font_Size;
 	cfi.dwFontSize.Y = Font_Size;
-	int nBufferWidth = nScreenWidth - 2;
-	int nBufferHeight = nScreenHeight - 2;
+	windowSize.Right = nScreenWidth-2;
+	windowSize.Bottom= nScreenHeight-2;
 	wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleWindowInfo(wHnd, TRUE, &windowSize);
 
@@ -44,10 +44,21 @@ void PGRG_WindowStart(int Screen_Width, int Screen_Height, int Font_Size)
 	SetConsoleScreenBufferSize(hConsole, charBufSize);
 	SetConsoleActiveScreenBuffer(hConsole);
 	SetCurrentConsoleFontEx(hConsole, FALSE, &cfi);
-	buffer[(nScreenWidth - 1) * (nScreenHeight - 1)];
+}
+void PGRG_FillColor(CHAR_INFO buffer[]){
+	for (int i = 0; i < nScreenWidth * nScreenHeight; ++i)
+	{
+		buffer[i].Char.AsciiChar = ' ';
+		buffer[i].Attributes = BACKGROUND_RED | BACKGROUND_INTENSITY;
+	}
+}
+void PGRG_Display(CHAR_INFO buffer[]){
+ PGRG *screen = buffer;
+WriteConsoleOutput(hConsole, screen, charBufSize, coordDest, &windowSize);
 }
 
-void DrawLine(int x1, int y1, int x2, int y2, CHAR_INFO buffer[])
+		
+void PGRG_DrawLine(int x1, int y1, int x2, int y2, CHAR_INFO buffer[])
 {
 	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
 	dx = x2 - x1;
@@ -125,5 +136,38 @@ void DrawLine(int x1, int y1, int x2, int y2, CHAR_INFO buffer[])
 		}
 	}
 }
+void PGRG_DrawCircle(int xc, int yc, int r,CHAR_INFO buffer[])
+	{
+		int x = 0;
+		int y = r;
+		int p = 3 - 2 * r;
+		if (!r) return;
+
+		while (y >= x) // only formulate 1/8 of circle
+		{
+			buffer[(yc-y) * (nScreenWidth - 1) + (xc-x)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//upper left left
+			buffer[(yc-x) * (nScreenWidth - 1) + (xc - y)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//upper upper left
+			buffer[(yc - x) * (nScreenWidth - 1) + (xc + y)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//upper upper right
+			buffer[(yc - y) * (nScreenWidth - 1) + (xc + x)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//upper right right
+			buffer[(yc + y) * (nScreenWidth - 1) + (xc - x)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//lower left left
+			buffer[(yc + x) * (nScreenWidth - 1) + (xc - y)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//lower lower left
+			buffer[(yc + x) * (nScreenWidth - 1) + (xc + y)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//lower lower right
+			buffer[(yc + y) * (nScreenWidth - 1) + (xc + x)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;//lower right right
+			if (p < 0) p += 4 * x++ + 6;
+			else p += 4 * (x++ - y--) + 10;
+		}
+	}
+	void PGRG_FillCircle(int center_x, int center_y, int radius,CHAR_INFO buffer[]) {
+    int x, y;
+    
+    for (y = -radius; y <= radius; y++) {
+        for (x = -radius; x <= radius; x++) {
+            if (x * x + y * y <= radius * radius) {
+               	buffer[(center_y + y) * (nScreenWidth - 1) + (center_x + x)].Attributes = BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE;
+            }
+        }
+    }
+}
+
 
 #endif
